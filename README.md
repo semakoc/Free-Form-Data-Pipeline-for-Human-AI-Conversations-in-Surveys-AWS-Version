@@ -5,7 +5,7 @@ This version is built for research and institutional deployment using AWS infras
 
 ---
 
-## 📚 Workshop Steps
+## 📚 Steps
 
 - [STEP 1: Deploying](https://github.com/semakoc/Free-Form-Data-Pipeline-for-Human-AI-Conversations-in-Surveys-AWS-Version/wiki/%F0%9F%93%81Project-Structure)
 - [STEP 2: Setting Environmental Variables](https://github.com/semakoc/Free-Form-Data-Pipeline-for-Human-AI-Conversations-in-Surveys-AWS-Version/wiki/%F0%9F%9A%80-Deployment)
