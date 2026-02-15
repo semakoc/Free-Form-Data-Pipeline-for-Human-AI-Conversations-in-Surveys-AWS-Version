@@ -1,0 +1,92 @@
+<!-- === MORAL STIMULI CHATBOT UI (REPLIT VERSION) === -->
+<!-- This version removes AWS-specific URLs and uses relative routes for Replit hosting -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Moral Stimuli Chat</title>
+  <style>
+    /* CHANGED: Simplified CSS for Replit’s Preview tab display */
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    #chat-box { border: 1px solid #ccc; padding: 1rem; background: #f9f9f9; margin-bottom: 1rem; white-space: pre-wrap; max-height: 500px; overflow-y: auto; }
+    .message { margin-bottom: 1rem; }
+    .user { color: #1a73e8; font-weight: bold; }
+    .bot { color: #34a853; font-weight: bold; }
+    #input-box { width: 80%; padding: 10px; font-size: 14px; height: 80px; font-family: inherit; }
+    #send-button { padding: 12px 24px; font-size: 16px; font-weight: bold; background-color: #1a73e8; color: white; border: none; border-radius: 6px; cursor: pointer; margin-left: 10px; }
+    #send-button:hover { background-color: #1669c1; }
+  </style>
+</head>
+
+<body>
+  <h1>Moral Stimuli Chat</h1>
+  <div id="chat-box"></div>
+  <textarea id="input-box" placeholder="Type your message here... (Shift+Enter for new line)"></textarea>
+  <button id="send-button">Send</button>
+
+  <script>
+    // CHANGED: Replit version reads parameters from the Qualtrics iframe URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const stimuli = urlParams.get("stimuli") || "default_stimuli";
+    const participant_id = urlParams.get("participant_id") || "anonymous";
+    const response_id = urlParams.get("response_id") || "none";
+
+    const chatBox = document.getElementById("chat-box");
+    const inputBox = document.getElementById("input-box");
+    const sendButton = document.getElementById("send-button");
+
+    function addMessage(sender, text) {
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add("message");
+      const className = sender.toLowerCase() === "you" ? "user" : "bot";
+      messageDiv.innerHTML = `<span class="${className}">${sender}:</span> ${text}`;
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage(message) {
+      if (!message.trim()) return;
+      addMessage("You", message);
+      inputBox.value = "";
+
+      // CHANGED: now uses relative /chat endpoint instead of AWS endpoint
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, participant_id, response_id, stimuli })
+      });
+
+      const data = await response.json();
+      addMessage("Moral Stimuli Assistant", data.response);
+    }
+
+    sendButton.addEventListener("click", () => sendMessage(inputBox.value));
+    inputBox.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(inputBox.value);
+      }
+    });
+
+    // CHANGED: Auto-starts conversation when embedded in Qualtrics
+    window.addEventListener("load", async () => {
+      const firstUserMessage = `Help me decide what I should do. ${stimuli}`;
+      addMessage("You", firstUserMessage);
+
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: firstUserMessage,
+          participant_id,
+          response_id,
+          stimuli
+        })
+      });
+      const data = await response.json();
+      addMessage("Moral Stimuli Assistant", data.response);
+    });
+  </script>
+</body>
+</html>
