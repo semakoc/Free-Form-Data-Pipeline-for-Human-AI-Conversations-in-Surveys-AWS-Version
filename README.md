@@ -11,12 +11,6 @@ This version is built for research and institutional deployment using AWS infras
 - [STEP 2: Setting Environmental Variables](https://github.com/semakoc/Free-Form-Data-Pipeline-for-Human-AI-Conversations-in-Surveys-AWS-Version/wiki/%F0%9F%9A%80-Deployment)
 - [STEP 3: Embedding in Qualtrics](https://github.com/semakoc/Free-Form-Data-Pipeline-for-Human-AI-Conversations-in-Surveys-AWS-Version/wiki/%F0%9F%A7%A9-Embedding-in-Qualtrics)
 
-### Additional Information
-
-- [Project Structure](https://github.com/semakoc/Free-Form-Chatbot-Pipleline-For-Surveys/wiki/Project-Structure)
-- [Logs & Troubleshooting](https://github.com/semakoc/Free-Form-Chatbot-Pipleline-For-Surveys/wiki/Logs-&-Troubleshooting)
-- [AWS Deployment](https://github.com/semakoc/Free-Form-Chatbot-Pipleline-For-Surveys/wiki/5.-Logs-&-Troubleshooting)
-
 ## Overview
 
 This project provides:
