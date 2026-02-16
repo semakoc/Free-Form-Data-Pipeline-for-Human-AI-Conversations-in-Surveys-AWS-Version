@@ -1,3 +1,4 @@
+# Backend for AWS deployment of the free-form human-AI conversation survey pipeline.
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from openai import OpenAI
@@ -18,7 +19,7 @@ SESSION_TIMEOUT_SECONDS = 15 * 60  # 15 minutes
 # Set up OpenAI
 client = OpenAI(api_key="...")
 
-# Set up S3
+# Set up S3 for AWS deployment
 s3 = boto3.client("s3")
 bucket_name = "futureus-demo-chatlogs"
 log_filename = "chatlog.csv"
@@ -46,8 +47,8 @@ def chat():
     user_input = data.get("message", "").strip()
     response_id = data.get("response_id", "none")
     participant_id = data.get("participant_id", "anonymous")
-    dilemma = data.get("dilemma", "unknown")
-    print(f" {response_id}: {user_input} (Dilemma: {dilemma})")
+    stimuli = data.get("stimuli", "unknown")
+    print(f" {response_id}: {user_input} (Stimuli: {stimuli})")
 
     session_key = (participant_id, response_id)
     now = time.time()
@@ -58,7 +59,7 @@ def chat():
         now - all_sessions[session_key]["last_active"] > SESSION_TIMEOUT_SECONDS
     ):
         system_prompt = (
-            f"You are a nonjudgmental assistant helping the user reflect on this moral dilemma: '{dilemma}'. " 
+            f"You are a nonjudgmental assistant helping the user reflect on this moral stimuli: '{stimuli}'. " 
             f"Keep your responses short—just a few sentences—and easy to understand, like you're texting a thoughtful friend. "
             f"Use plain language at an 8th-grade reading level. Avoid using bullet points or lists unless they truly make things clearer. "
             f"Be supportive, reflective, and help the user think things through calmly."
@@ -71,9 +72,9 @@ def chat():
 
     messages = all_sessions[session_key]["messages"]
 
-    # Inject starting message
+    # Inject starting message (AWS deployment)
     if user_input.upper() == "START_CONVERSATION":
-        user_input = f"Help me decide what I should do. {dilemma}"
+        user_input = f"Help me decide what I should do. {stimuli}"
 
     # Append and trim
     messages.append({"role": "user", "content": user_input})
@@ -93,9 +94,9 @@ def chat():
     all_sessions[session_key]["messages"] = messages
     all_sessions[session_key]["last_active"] = now
 
-    # Prepare log entry
+    # Prepare log entry (stored in S3 for AWS deployment)
     timestamp = datetime.datetime.now().isoformat()
-    new_row = [timestamp, MODEL_NAME, participant_id, response_id, dilemma, user_input, bot_reply]
+    new_row = [timestamp, MODEL_NAME, participant_id, response_id, stimuli, user_input, bot_reply]
 
     try:
         # Retrieve existing CSV from S3
@@ -110,12 +111,12 @@ def chat():
         writer = csv.writer(output)
 
         if not existing_data:
-            writer.writerow(["timestamp", "model", "participant_id", "response_id", "dilemma", "user_input", "bot_reply"])
+            writer.writerow(["timestamp", "model", "participant_id", "response_id", "stimuli", "user_input", "bot_reply"])
 
         writer.writerow(new_row)
         final_data = existing_data + output.getvalue() if existing_data else output.getvalue()
 
-        # Upload to S3
+        # Upload to S3 (AWS deployment)
         s3.put_object(Bucket=bucket_name, Key=log_filename, Body=final_data.encode('utf-8'))
         print(" Chat row appended to chatlog.csv")
 
