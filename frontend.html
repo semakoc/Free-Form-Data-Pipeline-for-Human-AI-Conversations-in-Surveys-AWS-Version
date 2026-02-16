@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+<!-- Frontend for AWS deployment of the free-form human-AI conversation survey pipeline. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Moral Dilemma Chat</title>
+  <title>Moral Stimuli Chat</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -60,7 +61,7 @@
 </head>
 
 <body>
-  <h1>Moral Dilemma Chat</h1>
+  <h1>Moral Stimuli Chat</h1>
 
   <div id="chat-box"></div>
 
@@ -69,7 +70,7 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const dilemma = urlParams.get("dilemma") || "a difficult moral decision";
+    const stimuli = urlParams.get("stimuli") || "a difficult moral decision";
     const participant_id = urlParams.get("participant_id") || "anonymous";
     const response_id = urlParams.get("response_id") || "none";
 
@@ -98,12 +99,12 @@
           message,
           participant_id,
           response_id,
-          dilemma
+          stimuli
         })
       });
 
       const data = await response.json();
-      addMessage("Moral Dilemma Assistant", data.response);
+      addMessage("Moral Stimuli Assistant", data.response);
     }
 
     sendButton.addEventListener("click", () => sendMessage(inputBox.value));
@@ -115,9 +116,9 @@
       }
     });
 
-    // Auto-start conversation
+    // Auto-start conversation (AWS deployment)
     window.addEventListener("load", async () => {
-      const firstUserMessage = `Help me decide what I should do. ${dilemma}`;
+      const firstUserMessage = `Help me decide what I should do. ${stimuli}`;
       addMessage("You", firstUserMessage);
 
       const response = await fetch("/chat", {
@@ -127,12 +128,12 @@
           message: firstUserMessage,
           participant_id,
           response_id,
-          dilemma
+          stimuli
         })
       });
 
       const data = await response.json();
-      addMessage("Moral Dilemma Assistant", data.response);
+      addMessage("Moral Stimuli Assistant", data.response);
     });
   </script>
 </body>
